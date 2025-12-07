@@ -14,7 +14,7 @@ export function getNetworkAddress(ip: string, mask: string): string {
     result.push(Number(ipOctets[i]) & Number(maskOctets[i]));
   }
 
-  return ${result[0]}.${result[1]}.${result[2]}.${result[3]};
+  return result[0] + "." + result[1] + "." + result[2] + "." + result[3];
 }
 
 export function getAddressesCount(mask: string): number {

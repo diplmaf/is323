@@ -14,7 +14,7 @@
 
       <div class="input-group">
         <label for="maskSelect">Маска подсети:</label>
-        <select id="maskSelect" v-model="selectedMask">
+        <select id="maskSelect" v-model="selectedMask" @change="showResult = false">
           <option v-for="option in options" :key="option" :value="option">
             {{ option }}
           </option>

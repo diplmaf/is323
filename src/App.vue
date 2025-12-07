@@ -14,7 +14,7 @@
 
       <div class="input-group">
         <label for="maskSelect">Маска подсети:</label>
-        <select id="maskSelect" v-model="selectedMask" @change="showResult = false">
+        <select id="maskSelect" v-model="selectedMask" @change="onMaskChange">
           <option v-for="option in options" :key="option" :value="option">
             {{ option }}
           </option>
@@ -75,6 +75,10 @@ const addressesCount = computed(() => {
   if (!isIpValidComputed.value || !showResult.value) return "";
   return getAddressesCount(selectedMask.value);
 });
+
+function onMaskChange() {
+  showResult.value = false;
+}
 
 function calculate() {
   if (isIpValidComputed.value && ip.value) {
@@ -170,12 +174,12 @@ button:hover:not(.btn-disabled) {
 .result-item:last-child {
   border-bottom: none;
 }
-
-.result-label {
+  .result-label {
   font-weight: bold;
   color: #2c3e50;
 }
-  .result-value {
+
+.result-value {
   color: #27ae60;
   font-weight: 500;
 }

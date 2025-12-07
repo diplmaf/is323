@@ -14,7 +14,7 @@
 
       <div class="input-group">
         <label for="maskSelect">Маска подсети:</label>
-        <select id="maskSelect" v-model="mask">
+        <select id="maskSelect" v-model="selectedMask">
           <option v-for="option in options" :key="option" :value="option">
             {{ option }}
           </option>
@@ -37,7 +37,7 @@
       </div>
       <div class="result-item">
         <span class="result-label">Выбранная маска:</span>
-        <span class="result-value">{{ mask }}</span>
+        <span class="result-value">{{ selectedMask }}</span>
       </div>
       <div class="result-item">
         <span class="result-label">Адрес сети:</span>
@@ -61,19 +61,19 @@ import {
 } from "@/functions";
 
 const ip = ref("");
-const mask = ref(options[0]);
+const selectedMask = ref(options[0]);
 const showResult = ref(false);
 
 const isIpValidComputed = computed(() => isIpValid(ip.value));
 
 const networkAddress = computed(() => {
-  if (!isIpValidComputed.value) return "";
-  return getNetworkAddress(ip.value, mask.value);
+  if (!isIpValidComputed.value || !showResult.value) return "";
+  return getNetworkAddress(ip.value, selectedMask.value);
 });
 
 const addressesCount = computed(() => {
-  if (!isIpValidComputed.value) return "";
-  return getAddressesCount(mask.value);
+  if (!isIpValidComputed.value || !showResult.value) return "";
+  return getAddressesCount(selectedMask.value);
 });
 
 function calculate() {
@@ -88,9 +88,9 @@ function calculate() {
   max-width: 500px;
   margin: 20px auto;
   padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #e0eafc, #cfdef3);
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .calculator-form {
@@ -107,15 +107,23 @@ function calculate() {
 
 .input-group label {
   font-weight: bold;
-  color: #333;
+  color: #2c3e50;
 }
 
 .input-group input,
 .input-group select {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 10px;
+  border: 2px solid #a0b3c6;
+  border-radius: 6px;
   font-size: 16px;
+  background-color: #ffffff;
+  transition: border-color 0.3s ease;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  outline: none;
+  border-color: #3498db;
 }
 
 .input-group input.input-invalid {
@@ -124,38 +132,39 @@ function calculate() {
 }
 
 .btn-disabled {
-  background-color: #cccccc;
+  background-color: #bdc3c7;
   cursor: not-allowed;
 }
 
 button {
-  padding: 10px;
-  background-color: #3498db;
+  padding: 12px;
+  background: linear-gradient(to right, #3498db, #2980b9);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background 0.3s ease;
 }
 
 button:hover:not(.btn-disabled) {
-  background-color: #2980b9;
+  background: linear-gradient(to right, #2980b9, #1c5a85);
 }
 
 .result-container {
   margin-top: 20px;
   padding: 15px;
-  background-color: #fff;
-  border: 1px solid #ddd;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #b3d9ff;
   border-radius: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .result-item {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+  border-bottom: 1px dashed #d6eaf8;
 }
 
 .result-item:last-child {
@@ -164,10 +173,10 @@ button:hover:not(.btn-disabled) {
 
 .result-label {
   font-weight: bold;
-  color: #555;
+  color: #2c3e50;
 }
-
-.result-value {
-  color: #333;
+  .result-value {
+  color: #27ae60;
+  font-weight: 500;
 }
 </style>

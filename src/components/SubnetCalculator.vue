@@ -9,6 +9,7 @@
           type="text"
           placeholder="Например: 192.168.1.150"
           :class="{ 'input-invalid': !isIpValid && ip !== '' }"
+          @input="onIpChange"
         />
       </div>
 
@@ -53,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { options } from "@/options"; 
+import { options } from "@/options";
 import {
   isIpValid,
   getNetworkAddress,
@@ -75,6 +76,10 @@ const addressesCount = computed(() => {
   if (!isIpValidComputed.value || !showResult.value) return "";
   return getAddressesCount(selectedMask.value);
 });
+
+function onIpChange() {
+  showResult.value = false;
+}
 
 function onMaskChange() {
   showResult.value = false;

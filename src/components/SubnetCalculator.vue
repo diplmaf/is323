@@ -1,173 +1,171 @@
 <template>
-  <div class="subnet-calculator">
-    <form @submit.prevent="calculate" class="calculator-form">
-      <div class="input-group">
-        <label for="ipInput">IP Адрес:</label>
-        <input
-          id="ipInput"
-          v-model="ip"
-          type="text"
-          placeholder="Например: 192.168.1.150"
-          :class="{ 'input-invalid': !isIpValid && ip !== '' }"
-        />
-      </div>
-
-      <div class="input-group">
-        <label for="maskSelect">Маска подсети:</label>
-        <select id="maskSelect" v-model="mask">
-          <option v-for="option in options" :key="option" :value="option">
-            {{ option }}
-          </option>
-        </select>
-      </div>
-
-      <button
-        type="submit"
-        :disabled="!isIpValid"
-        :class="{ 'btn-disabled': !isIpValid }"
+  <div class="calculator">
+    <h2>Калькулятор подсетей</h2>
+    
+    <div class="form-group">
+      <label>IP адрес:</label>
+      <input 
+        v-model="ip" 
+        type="text" 
+        placeholder="192.168.1.150"
+        :class="{ 'error': ip && !isValid }"
+        @keyup.enter="calculate"
       >
-        Рассчитать
+      <div v-if="ip && !isValid" class="error-message">
+        Неверный формат IP адреса
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>Маска подсети:</label>
+      <select v-model="selectedMask">
+        <option 
+          v-for="mask in NETWORK_MASKS" 
+          :key="mask" 
+          :value="mask"
+        >
+          {{ mask }}
+        </option>
+      </select>
+    </div>
+    
+    <button 
+      @click="calculate" 
+      :disabled="!isValid || !ip"
+      class="calculate-btn"
+    >
+      Рассчитать
+    </button>
+    
+    <div v-if="showResults" class="results">
+      <h3>Результаты расчета:</h3>
+      
+      <div class="result-row">
+        <span class="label">IP адрес:</span>
+        <span class="value">{{ calculatedIp }}</span>
+      </div>
+      
+      <div class="result-row">
+        <span class="label">Маска подсети:</span>
+        <span class="value">{{ calculatedMask }}</span>
+      </div>
+      
+      <div class="result-row">
+        <span class="label">Адрес сети:</span>
+        <span class="value">{{ networkAddress }}</span>
+      </div>
+      
+      <div class="result-row">
+        <span class="label">Количество адресов:</span>
+        <span class="value">{{ addressesCount }}</span>
+      </div>
+      
+      <div class="result-row">
+        <span class="label">Широковещательный адрес:</span>
+        <span class="value">{{ broadcastAddress }}</span>
+      </div>
+      
+      <div class="result-row">
+        <span class="label">Первый доступный адрес:</span>
+        <span class="value">{{ firstAddress }}</span>
+      </div>
+      
+      <div class="result-row">
+        <span class="label">Последний доступный адрес:</span>
+        <span class="value">{{ lastAddress }}</span>
+      </div>
+      
+      <div class="result-row">
+        <span class="label">Диапазон адресов:</span>
+        <span class="value">{{ firstAddress }} - {{ lastAddress }}</span>
+      </div>
+      
+      <button @click="clearResults" class="clear-btn">
+        Очистить результаты
       </button>
-    </form>
-
-    <div v-if="showResult" class="result-container">
-      <div class="result-item">
-        <span class="result-label">Введенный IP адрес:</span>
-        <span class="result-value">{{ ip }}</span>
-      </div>
-      <div class="result-item">
-        <span class="result-label">Выбранная маска:</span>
-        <span class="result-value">{{ mask }}</span>
-      </div>
-      <div class="result-item">
-        <span class="result-label">Адрес сети:</span>
-        <span class="result-value">{{ networkAddress }}</span>
-      </div>
-      <div class="result-item">
-        <span class="result-label">Количество возможных адресов:</span>
-        <span class="result-value">{{ addressesCount }}</span>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { options } from "@/options";
-import {
-  isIpValid,
-  getNetworkAddress,
+import { ref, computed } from 'vue'
+import { NETWORK_MASKS } from '../constants/options'
+import { 
+  isIpValid, 
+  getNetworkAddress, 
   getAddressesCount,
-} from "@/functions";
+  getBroadcastAddress,
+  getFirstAddress,
+  getLastAddress 
+} from '../utils/functions'
 
-const ip = ref("");
-const mask = ref(options[0]);
-const showResult = ref(false);
+const ip = ref('192.168.1.150')
+const selectedMask = ref(NETWORK_MASKS[24])
 
-const isIpValidComputed = computed(() => isIpValid(ip.value));
+const showResults = ref(false)
 
-const networkAddress = computed(() => {
-  if (!isIpValidComputed.value) return "";
-  return getNetworkAddress(ip.value, mask.value);
-});
+const calculatedIp = ref('')
+const calculatedMask = ref('')
 
-const addressesCount = computed(() => {
-  if (!isIpValidComputed.value) return "";
-  return getAddressesCount(mask.value);
-});
+const isValid = computed(() => isIpValid(ip.value))
 
+const networkAddress = computed(() => 
+  calculatedIp.value && calculatedMask.value 
+    ? getNetworkAddress(calculatedIp.value, calculatedMask.value)
+    : ''
+)
+
+const addressesCount = computed(() => 
+  calculatedMask.value ? getAddressesCount(calculatedMask.value) : 0
+)
+
+const broadcastAddress = computed(() => 
+  calculatedIp.value && calculatedMask.value 
+    ? getBroadcastAddress(calculatedIp.value, calculatedMask.value)
+    : ''
+)
+
+const firstAddress = computed(() => 
+  calculatedIp.value && calculatedMask.value 
+    ? getFirstAddress(calculatedIp.value, calculatedMask.value)
+    : ''
+)
+
+const lastAddress = computed(() => 
+  calculatedIp.value && calculatedMask.value 
+    ? getLastAddress(calculatedIp.value, calculatedMask.value)
+    : ''
+)
 function calculate() {
-  if (isIpValidComputed.value) {
-    showResult.value = true;
+  if (isValid.value && ip.value) {
+ 
+    calculatedIp.value = ip.value
+    calculatedMask.value = selectedMask.value
+
+    showResults.value = true
   }
+}
+
+function clearResults() {
+  showResults.value = false
+  calculatedIp.value = ''
+  calculatedMask.value = ''
 }
 </script>
 
 <style scoped>
-.subnet-calculator {
-  max-width: 500px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
-.calculator-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.input-group label {
-  font-weight: bold;
-  color: #333;
-}
-
-.input-group input,
-.input-group select {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.input-group input.input-invalid {
-  border-color: #e74c3c;
-  background-color: #fadbd8;
-}
-
-.btn-disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-button {
-  padding: 10px;
-  background-color: #3498db;
+.clear-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #ff4444;
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s;
 }
 
-button:hover:not(.btn-disabled) {
-  background-color: #2980b9;
-}
-
-.result-container {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-.result-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.result-item:last-child {
-  border-bottom: none;
-}
-
-.result-label {
-  font-weight: bold;
-  color: #555;
-}
-
-.result-value {
-  color: #333;
+.clear-btn:hover {
+  background-color: #cc0000;
 }
 </style>

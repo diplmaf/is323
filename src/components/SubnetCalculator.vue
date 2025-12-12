@@ -9,13 +9,13 @@
           type="text"
           placeholder="Например: 192.168.1.150"
           :class="{ 'input-invalid': !isIpValid && ip !== '' }"
-          @input="onIpChange"
+          @input="onInputChange"
         />
       </div>
 
       <div class="input-group">
         <label for="maskSelect">Маска подсети:</label>
-        <select id="maskSelect" v-model="selectedMask" @change="onMaskChange">
+        <select id="maskSelect" v-model="selectedMask" @change="onInputChange">
           <option v-for="option in options" :key="option" :value="option">
             {{ option }}
           </option>
@@ -77,11 +77,7 @@ const addressesCount = computed(() => {
   return getAddressesCount(selectedMask.value);
 });
 
-function onIpChange() {
-  showResult.value = false;
-}
-
-function onMaskChange() {
+function onInputChange() {
   showResult.value = false;
 }
 
